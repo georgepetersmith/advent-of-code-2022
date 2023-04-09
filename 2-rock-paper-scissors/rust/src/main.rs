@@ -1,6 +1,6 @@
 use std::env;
 use std::fs::File;
-use std::io::{prelude::*, BufReader, Result};
+use std::io::{prelude::*, BufReader};
 use std::str::FromStr;
 
 #[derive(PartialEq)]
@@ -39,10 +39,10 @@ impl FromStr for Move {
     }
 }
 
-fn main() -> Result<()> {
+fn main() {
     let args: Vec<String> = env::args().collect();
     let file_path = &args[1];
-    let file = File::open(file_path)?;
+    let file = File::open(file_path).unwrap();
     let reader = BufReader::new(file);
 
     let mut accum_score = 0;
@@ -73,6 +73,4 @@ fn main() -> Result<()> {
     }
 
     println!("Part One Answer: {}", accum_score);
-
-    Ok(())
 }

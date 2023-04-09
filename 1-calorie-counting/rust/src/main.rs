@@ -1,11 +1,11 @@
 use std::env;
 use std::fs::File;
-use std::io::{prelude::*, BufReader, Result};
+use std::io::{prelude::*, BufReader};
 
-fn main() -> Result<()> {
+fn main() {
     let args: Vec<String> = env::args().collect();
     let file_path = &args[1];
-    let file = File::open(file_path)?;
+    let file = File::open(file_path).unwrap();
     let reader = BufReader::new(file);
 
     let mut calorie_count = 0;
@@ -26,6 +26,4 @@ fn main() -> Result<()> {
             calorie_count += calories.parse::<i32>().unwrap();
         }
     }
-
-    Ok(())
 }
