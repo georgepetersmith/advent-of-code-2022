@@ -1,29 +1,26 @@
 use std::env;
 use std::fs::File;
-use std::io::{prelude::*, BufReader};
+use std::io::{prelude::*, Result};
 
-fn main() {
+fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
     let file_path = &args[1];
-    let file = File::open(file_path).unwrap();
-    let reader = BufReader::new(file);
+    let mut file = File::open(file_path)?;
 
-    let mut calorie_count = 0;
-    let mut highest_calorie_count = 0;
+    let mut buffer = String::new();
+    file.read_to_string(&mut buffer)?;
 
-    for line in reader.lines() {
-        if let Ok(calories) = line {
-            if calories.is_empty() {
-                if calorie_count > highest_calorie_count {
-                    highest_calorie_count = calorie_count;
-                }
+    let calorie_count = buffer
+        .split("\n\n")
+        .map(|elf| {
+            elf.lines()
+                .map(|calorie| calorie.parse::<u32>().unwrap())
+                .sum::<u32>()
+        })
+        .max()
+        .unwrap();
 
-                calorie_count = 0;
+    println!("{}", calorie_count);
 
-                continue;
-            }
-
-            calorie_count += calories.parse::<i32>().unwrap();
-        }
-    }
+    Ok(())
 }
