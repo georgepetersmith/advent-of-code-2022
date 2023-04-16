@@ -1,87 +1,72 @@
-use itertools::Itertools;
 use std::collections::HashMap;
 use std::env;
-use std::fs::File;
-use std::io::{prelude::*, BufReader};
-use substring::Substring;
-
+use std::fs::read_to_string;
 
 fn main() {
     let file_path = env::args().nth(1).unwrap();
-    let file = File::open(file_path).unwrap();
-    let reader = BufReader::new(file);
-    let lines = reader.lines().map(|s| s.unwrap()).collect::<Vec<String>>();
+    let input = read_to_string(file_path).unwrap();
+    let lines = input.lines().collect();
 
-    let mut priorities = HashMap::new();
-    {
-        let mut priority = 1;
-        for c in 'a'..='z' {
-            priorities.insert(c, priority);
-            priority += 1;
-        }
-        for c in 'A'..='Z' {
-            priorities.insert(c, priority);
-            priority += 1;
-        }
-    }
+    let priorities = ('a'..='z')
+        .chain('A'..='Z')
+        .into_iter()
+        .enumerate()
+        .map(|(i, c)| (c, i + 1))
+        .collect::<HashMap<char, usize>>();
 
     part_one(&lines, &priorities);
     part_two(&lines, &priorities);
 }
 
-fn part_one(lines: &Vec<String>, priorities: &HashMap<char, i32>) {
-    let mut accum = 0;
-    for contents in lines.iter() {
-        let rucksack_size = contents.len();
-        let compartment_size = rucksack_size / 2;
+fn part_one(lines: &Vec<&str>, priorities: &HashMap<char, usize>) {
+    let total_priority = lines
+        .iter()
+        .map(|s| {
+            let (compartment1, compartment2) = s.split_at(s.len() / 2);
+            let common_char = compartment1
+                .chars()
+                .find(|c| compartment2.contains(*c))
+                .unwrap();
 
-        let compartment1 = contents.substring(0, compartment_size);
-        let compartment2 = contents.substring(compartment_size, rucksack_size);
-        let shared_priority: i32 = compartment2
-            .chars()
-            .unique()
-            .map(|s| {
-                if compartment1.contains(s) {
-                    return priorities[&s];
-                } else {
-                    return 0;
-                };
-            })
-            .sum();
+            priorities.get(&common_char).unwrap()
+        })
+        .sum::<usize>();
 
-        accum += shared_priority;
-    }
-
-    println!("Part One: {}", accum);
+    println!("Part One: {}", total_priority);
 }
 
-fn part_two(lines: &Vec<String>, priorities: &HashMap<char, i32>) {
-    let mut groups: Vec<[&str; 3]> = Vec::new();
-    let mut group: [&str; 3] = ["", "", ""];
+fn part_two(lines: &Vec<&str>, priorities: &HashMap<char, usize>) {
+    // This can be replaced with the array_chunks method in the nightly API.
+    // https://doc.rust-lang.org/std/slice/struct.ArrayChunks.html
+    let mut array_chunks: Vec<[&str; 3]> = Vec::new();
+    let mut chunk: [&str; 3] = ["", "", ""];
     let mut slice_iter = 0;
-    for contents in lines.iter() {
-        group[slice_iter] = contents.as_str();
+    for line in lines {
+        chunk[slice_iter] = line;
         slice_iter += 1;
         if slice_iter == 3 {
-            groups.push(group.clone());
-            group = ["", "", ""];
+            array_chunks.push(chunk);
+            chunk = ["", "", ""];
             slice_iter = 0;
         }
     }
 
-    let mut accum = 0;
-    let mut group_badge = None;
-    for g in groups {
-        for c in g[0].chars() {
-            if g[1].contains(c) && g[2].contains(c) {
-                group_badge = Some(c);
-                break;
-            }
-        }
+    let total_priority = array_chunks
+        .iter()
+        .map(|e| {
+            let elf1 = e.get(0).unwrap();
+            let common_char = elf1
+                .chars()
+                .find(|c| {
+                    let elf2 = e.get(1).unwrap();
+                    let elf3 = e.get(2).unwrap();
+                    elf2.contains(*c) && elf3.contains(*c)
+                })
+                .unwrap();
 
-        let priority = priorities[&group_badge.unwrap()];
-        accum += priority;
-    }
+            priorities.get(&common_char).unwrap()
+        })
+        .sum::<usize>();
 
-    println!("Part Two: {}", accum);
+    println!("Part Two: {}", total_priority);
 }
