@@ -6,6 +6,11 @@ fn main() -> Result<()> {
 [N] [C]    
 [Z] [M] [P]
  1   2   3 
+
+move 1 from 2 to 1
+move 3 from 1 to 3
+move 2 from 2 to 1
+move 1 from 1 to 2
 ";
 
     part_one(input)?;
@@ -14,10 +19,10 @@ fn main() -> Result<()> {
 }
 
 fn part_one(input: &str) -> Result<()> {
-    println!("{}", input);
+    let inputs = input.split("\n\n").collect::<Vec<&str>>();
 
     let crate_indexes = [1, 5, 9];
-    let mut rows = input
+    let mut rows = inputs[0]
         .lines()
         .map(|l| {
             l.chars()
@@ -33,12 +38,15 @@ fn part_one(input: &str) -> Result<()> {
     // Remove stack indexes
     rows.pop();
 
-    let mut stacks: HashMap<usize, Vec<Option<char>>> =
+    let mut stacks: HashMap<usize, Vec<char>> =
         HashMap::from([(1, Vec::new()), (2, Vec::new()), (3, Vec::new())]);
+
     for row in rows {
         for c in row {
-            let list = stacks.get_mut(&c.0).unwrap();
-            list.push(c.1);
+            if let Some(x) = c.1 {
+                let list = stacks.get_mut(&c.0).unwrap();
+                list.push(x);
+            }
         }
     }
 
@@ -49,6 +57,18 @@ fn part_one(input: &str) -> Result<()> {
         list.reverse();
     }
 
+    let actions = inputs[1].lines();
+    for action in actions {
+        let _ = action
+            .replace("move ", "")
+            .replace("from ", "")
+            .replace("to ", "")
+            .split(' ')
+            .map(|n| n.parse::<usize>().unwrap())
+            .collect::<Vec<usize>>();
+    }
+
     dbg!(stacks);
+
     Ok(())
 }
