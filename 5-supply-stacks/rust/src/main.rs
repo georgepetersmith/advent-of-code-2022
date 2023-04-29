@@ -1,7 +1,7 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
-use std::io::Result;
 
-fn main() -> Result<()> {
+fn main() {
     let input = "    [D]    
 [N] [C]    
 [Z] [M] [P]
@@ -13,12 +13,10 @@ move 2 from 2 to 1
 move 1 from 1 to 2
 ";
 
-    part_one(input)?;
-
-    Ok(())
+    part_one(input);
 }
 
-fn part_one(input: &str) -> Result<()> {
+fn part_one(input: &str) {
     let inputs = input.split("\n\n").collect::<Vec<&str>>();
 
     let crate_indexes = [1, 5, 9];
@@ -38,37 +36,57 @@ fn part_one(input: &str) -> Result<()> {
     // Remove stack indexes
     rows.pop();
 
-    let mut stacks: HashMap<usize, Vec<char>> =
-        HashMap::from([(1, Vec::new()), (2, Vec::new()), (3, Vec::new())]);
+    let stacks: HashMap<usize, RefCell<Vec<char>>> = HashMap::from([
+        (1, RefCell::new(Vec::new())),
+        (2, RefCell::new(Vec::new())),
+        (3, RefCell::new(Vec::new())),
+    ]);
 
     for row in rows {
         for c in row {
             if let Some(x) = c.1 {
-                let list = stacks.get_mut(&c.0).unwrap();
+                let mut list = stacks.get(&c.0).unwrap().borrow_mut();
                 list.push(x);
             }
         }
     }
 
     // Reversing lists to use push/pop for moving crates.
-    // The answer will now be the first crate in each list
+    // The answer will now be the last crate in each vec.
     for i in 1..=stacks.len() {
-        let list = stacks.get_mut(&i).unwrap();
+        let mut list = stacks.get(&i).unwrap().borrow_mut();
         list.reverse();
     }
 
-    let actions = inputs[1].lines();
-    for action in actions {
-        let _ = action
+    let commands = inputs[1].lines();
+    for command in commands {
+        let sub_commands = command
             .replace("move ", "")
             .replace("from ", "")
             .replace("to ", "")
             .split(' ')
             .map(|n| n.parse::<usize>().unwrap())
             .collect::<Vec<usize>>();
+
+        let quantity = sub_commands[0];
+        let from_stack_index = sub_commands[1];
+        let to_stack_index = sub_commands[2];
+
+        let mut from_stack = stacks.get(&from_stack_index).unwrap().borrow_mut();
+        let mut to_stack = stacks.get(&to_stack_index).unwrap().borrow_mut();
+
+        for _ in 0..quantity {
+            if let Some(crate_char) = from_stack.pop() {
+                to_stack.push(crate_char);
+            }
+        }
     }
 
-    dbg!(stacks);
-
-    Ok(())
+    for i in 1..=stacks.len() {
+        let stack = stacks.get(&i).unwrap().borrow();
+        let answer = stack.last();
+        if let Some(x) = answer {
+            println!("{}", x);
+        }
+    }
 }
