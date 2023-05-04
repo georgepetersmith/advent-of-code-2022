@@ -1,7 +1,7 @@
+use itertools::Itertools;
 use std::env;
 use std::fs::File;
 use std::io::{prelude::*, Result};
-use itertools::Itertools;
 
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
