@@ -1,25 +1,26 @@
+use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::env::args;
+use std::fs::File;
+use std::io::prelude::*;
 
 fn main() {
-    let input = "    [D]    
-[N] [C]    
-[Z] [M] [P]
- 1   2   3 
+    let mut buffer = String::new();
+    let mut file = File::open(args().nth(1).unwrap()).unwrap();
+    file.read_to_string(&mut buffer).unwrap();
 
-move 1 from 2 to 1
-move 3 from 1 to 3
-move 2 from 2 to 1
-move 1 from 1 to 2
-";
-
-    part_one(input);
+    part_one(&buffer);
 }
 
 fn part_one(input: &str) {
     let inputs = input.split("\n\n").collect::<Vec<&str>>();
 
-    let crate_indexes = [1, 5, 9];
+    let stack_quantity = (input.lines().next().unwrap().len() + 1) / 4;
+    let crate_indexes = (1..=stack_quantity)
+        .map(|i| (i * 4) - 3)
+        .collect::<Vec<usize>>();
+
     let mut rows = inputs[0]
         .lines()
         .map(|l| {
@@ -28,32 +29,26 @@ fn part_one(input: &str) {
                 .filter(|(i, _)| crate_indexes.contains(i))
                 .map(|t| if t.1 == ' ' { None } else { Some(t.1) })
                 .enumerate()
-                .map(|(i, c)| (i + 1, c))
-                .collect::<HashMap<usize, Option<char>>>()
+                .collect()
         })
-        .collect::<Vec<HashMap<usize, Option<char>>>>();
+        .collect::<Vec<Vec<(usize, Option<char>)>>>();
 
     // Remove stack indexes
     rows.pop();
 
-    let stacks: HashMap<usize, RefCell<Vec<char>>> = HashMap::from([
-        (1, RefCell::new(Vec::new())),
-        (2, RefCell::new(Vec::new())),
-        (3, RefCell::new(Vec::new())),
-    ]);
-
+    let mut stacks: HashMap<usize, RefCell<Vec<char>>> = HashMap::new();
     for row in rows {
         for c in row {
             if let Some(x) = c.1 {
-                let mut list = stacks.get(&c.0).unwrap().borrow_mut();
-                list.push(x);
+                let list = stacks.entry(c.0 + 1).or_insert(RefCell::new(Vec::new()));
+                list.borrow_mut().push(x);
             }
         }
     }
 
     // Reversing lists to use push/pop for moving crates.
     // The answer will now be the last crate in each vec.
-    for i in 1..=stacks.len() {
+    for i in 1..=stack_quantity {
         let mut list = stacks.get(&i).unwrap().borrow_mut();
         list.reverse();
     }
@@ -82,11 +77,14 @@ fn part_one(input: &str) {
         }
     }
 
-    for i in 1..=stacks.len() {
-        let stack = stacks.get(&i).unwrap().borrow();
-        let answer = stack.last();
-        if let Some(x) = answer {
-            println!("{}", x);
-        }
-    }
+    let answer = stacks
+        .iter()
+        .sorted_by_key(|x| x.0)
+        .fold(String::new(), |mut ans, c| {
+            let cr = c.1.borrow().last().unwrap().clone();
+            ans.push(cr);
+            ans
+        });
+
+    println!("{}", answer);
 }
