@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::cell::RefCell;
+use std::cell::{RefCell, RefMut};
 use std::collections::HashMap;
 use std::env::args;
 use std::fs::File;
@@ -10,10 +10,41 @@ fn main() {
     let mut file = File::open(args().nth(1).unwrap()).unwrap();
     file.read_to_string(&mut buffer).unwrap();
 
-    part_one(&buffer);
+    let part_one_answer = calculate_top_crates(&buffer, &mut move_crates_individually);
+    println!("Part One Answer: {}", part_one_answer);
+
+    let part_two_answer = calculate_top_crates(&buffer, &mut move_crates_grouped);
+    println!("Part Two Answer: {}", part_two_answer);
 }
 
-fn part_one(input: &str) {
+fn move_crates_individually(
+    from_stack: &mut RefMut<Vec<char>>,
+    to_stack: &mut RefMut<Vec<char>>,
+    quantity: usize,
+) {
+    for _ in 0..quantity {
+        if let Some(crate_char) = from_stack.pop() {
+            to_stack.push(crate_char);
+        }
+    }
+}
+
+fn move_crates_grouped(
+    from_stack: &mut RefMut<Vec<char>>,
+    to_stack: &mut RefMut<Vec<char>>,
+    quantity: usize,
+) {
+    let split_index = from_stack.len() - quantity;
+    let crates_to_move = from_stack.split_off(split_index);
+    for crate_char in crates_to_move {
+        to_stack.push(crate_char);
+    }
+}
+
+fn calculate_top_crates(
+    input: &str,
+    move_crates: &mut dyn FnMut(&mut RefMut<Vec<char>>, &mut RefMut<Vec<char>>, usize),
+) -> String {
     let inputs = input.split("\n\n").collect::<Vec<&str>>();
 
     let stack_quantity = (input.lines().next().unwrap().len() + 1) / 4;
@@ -70,11 +101,7 @@ fn part_one(input: &str) {
         let mut from_stack = stacks.get(&from_stack_index).unwrap().borrow_mut();
         let mut to_stack = stacks.get(&to_stack_index).unwrap().borrow_mut();
 
-        for _ in 0..quantity {
-            if let Some(crate_char) = from_stack.pop() {
-                to_stack.push(crate_char);
-            }
-        }
+        move_crates(&mut from_stack, &mut to_stack, quantity)
     }
 
     let answer = stacks
@@ -86,5 +113,5 @@ fn part_one(input: &str) {
             ans
         });
 
-    println!("{}", answer);
+    answer
 }
