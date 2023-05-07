@@ -2,13 +2,10 @@ use itertools::Itertools;
 use std::cell::{RefCell, RefMut};
 use std::collections::HashMap;
 use std::env::args;
-use std::fs::File;
-use std::io::prelude::*;
 
 fn main() {
-    let mut buffer = String::new();
-    let mut file = File::open(args().nth(1).unwrap()).unwrap();
-    file.read_to_string(&mut buffer).unwrap();
+    let path = args().nth(1).unwrap();
+    let buffer = std::fs::read_to_string(path).unwrap();
 
     let part_one_answer = calculate_top_crates(&buffer, &mut move_crates_individually);
     println!("Part One Answer: {}", part_one_answer);
