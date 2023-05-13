@@ -1,14 +1,19 @@
-use std::env;
-use std::fs::File;
-use std::io::{prelude::*, BufReader};
 use std::str::FromStr;
+
+pub fn run_part(part: u8, input: &str) -> String {
+    match part {
+        1 => part_one(&input),
+        2 => part_two(&input),
+        _ => panic!("There is no part {} for this day", part),
+    }
+}
 
 #[derive(PartialEq, Debug)]
 struct Move {
     shape: Shape,
     score: i32,
     beats: Shape,
-    loses: Shape
+    loses: Shape,
 }
 
 #[derive(PartialEq, Debug)]
@@ -46,7 +51,7 @@ impl Move {
                 shape: Shape::Scissors,
                 score: 3,
                 beats: Shape::Paper,
-                loses: Shape::Rock
+                loses: Shape::Rock,
             },
         }
     }
@@ -65,20 +70,9 @@ impl FromStr for Move {
     }
 }
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    let file_path = &args[1];
-    let file = File::open(file_path).unwrap();
-    let reader = BufReader::new(file);
-    let lines: Vec<String> = reader.lines().map(|s| s.unwrap()).collect();
-
-    part_one(&lines);
-    part_two(&lines);
-}
-
-fn part_one(rounds: &Vec<String>) {
+fn part_one(input: &str) -> String {
     let mut accum_score = 0;
-    for round in rounds.iter() {
+    for round in input.lines() {
         let moves: Vec<Move> = round.split(' ').map(|s| s.parse().unwrap()).collect();
         let my_move = moves.get(1).expect("Failed to get my move");
         let opponent_move = moves.get(0).expect("Failed to get opponent's move");
@@ -96,28 +90,28 @@ fn part_one(rounds: &Vec<String>) {
         accum_score += score;
     }
 
-    println!("Part One Answer: {}", accum_score);
+    accum_score.to_string()
 }
 
-fn part_two(rounds: &Vec<String>) {
+fn part_two(input: &str) -> String {
     let mut accum_score = 0;
-    for round in rounds.iter() {
+    for round in input.lines() {
         let opponent_move = round.split(' ').nth(0).unwrap().parse::<Move>().unwrap();
         let outcome = match round.split(' ').nth(1).unwrap() {
             "X" => Outcome::Lose,
             "Y" => Outcome::Draw,
-            _ => Outcome::Win
+            _ => Outcome::Win,
         };
 
         let my_move = match outcome {
             Outcome::Win => Move::new(opponent_move.loses),
             Outcome::Draw => Move::new(opponent_move.shape),
-            Outcome::Lose => Move::new(opponent_move.beats)
+            Outcome::Lose => Move::new(opponent_move.beats),
         };
 
         let score = my_move.score + outcome as i32;
         accum_score += score;
     }
 
-    println!("Part Two Answer: {}", accum_score);
+    accum_score.to_string()
 }

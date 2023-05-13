@@ -1,16 +1,16 @@
-use std::env;
-use std::fs::File;
-use std::io::{prelude::*, BufReader};
+pub fn run_part(part: u8, input: &str) -> String {
+    let answers = solution(&input);
+    match part {
+        1 => answers.0,
+        2 => answers.1,
+        _ => panic!("There is no part {} for this day", part),
+    }
+}
 
-fn main() {
-    let file_path = env::args().nth(1).unwrap();
-    let file = File::open(file_path).unwrap();
-    let reader = BufReader::new(file);
-
+fn solution(input: &str) -> (String, String) {
     let mut part_one_count = 0;
     let mut part_two_count = 0;
-    for line_result in reader.lines() {
-        let line = line_result.unwrap();
+    for line in input.lines() {
         let sections = line.split(',').collect::<Vec<&str>>();
 
         let mut first_section_lower = 0;
@@ -52,6 +52,5 @@ fn main() {
         }
     }
 
-    println!("Part One: {}", part_one_count);
-    println!("Part One: {}", part_two_count);
+    (part_one_count.to_string(), part_two_count.to_string())
 }

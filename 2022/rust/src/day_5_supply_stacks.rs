@@ -1,17 +1,13 @@
 use itertools::Itertools;
 use std::cell::{RefCell, RefMut};
 use std::collections::HashMap;
-use std::env::args;
 
-fn main() {
-    let path = args().nth(1).unwrap();
-    let buffer = std::fs::read_to_string(path).unwrap();
-
-    let part_one_answer = calculate_top_crates(&buffer, &mut move_crates_individually);
-    println!("Part One Answer: {}", part_one_answer);
-
-    let part_two_answer = calculate_top_crates(&buffer, &mut move_crates_grouped);
-    println!("Part Two Answer: {}", part_two_answer);
+pub fn run_part(part: u8, input: &str) -> String {
+    match part {
+        1 => calculate_top_crates(&input, &mut move_crates_individually),
+        2 => calculate_top_crates(&input, &mut move_crates_grouped),
+        _ => panic!("There is no part {} for this day", part),
+    }
 }
 
 fn move_crates_individually(

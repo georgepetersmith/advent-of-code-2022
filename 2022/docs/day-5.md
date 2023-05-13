@@ -1,7 +1,6 @@
 # Day 5: Supply Stacks
 
 ## Part One
-
 The expedition can depart as soon as the final supplies have been unloaded from the ships. Supplies are stored in stacks of marked crates, but because the needed supplies are buried under many other crates, the crates need to be rearranged.
 
 The ship has a giant cargo crane capable of moving crates between stacks. To ensure none of the crates get crushed or fall over, the crane operator will rearrange them in a series of carefully-planned steps. After the crates are rearranged, the desired crates will be at the top of each stack.
@@ -63,7 +62,6 @@ The Elves just need to know which crate will end up on top of each stack; in thi
 **After the rearrangement procedure completes, what crate ends up on top of each stack?**
 
 ## Part Two
-
 As you watch the crane operator expertly rearrange the crates, you notice the process isn't following your prediction.
 
 Some mud was covering the writing on the side of the crane, and you quickly wipe it away. The crane isn't a CrateMover 9000 - it's a CrateMover 9001.
@@ -115,4 +113,4 @@ Finally, a single crate is still moved from stack 1 to stack 2, but now it's cra
 ```
 In this example, the CrateMover 9001 has put the crates in a totally different order: MCD.
 
-Before the rearrangement process finishes, update your simulation so that the Elves know where they should stand to be ready to unload the final supplies. **After the rearrangement procedure completes, what crate ends up on top of each stack?**
+**Before the rearrangement process finishes, update your simulation so that the Elves know where they should stand to be ready to unload the final supplies. After the rearrangement procedure completes, what crate ends up on top of each stack?**

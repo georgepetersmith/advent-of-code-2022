@@ -1,26 +1,26 @@
 use std::collections::HashMap;
-use std::env;
-use std::fs::read_to_string;
 
-fn main() {
-    let file_path = env::args().nth(1).unwrap();
-    let input = read_to_string(file_path).unwrap();
-    let lines = input.lines().collect();
+pub fn run_part(part: u8, input: &str) -> String {
+    match part {
+        1 => part_one(&input),
+        2 => part_two(&input),
+        _ => panic!("There is no part {} for this day", part),
+    }
+}
 
-    let priorities = ('a'..='z')
+fn get_priorities() -> HashMap<char, usize> {
+    ('a'..='z')
         .chain('A'..='Z')
         .into_iter()
         .enumerate()
         .map(|(i, c)| (c, i + 1))
-        .collect::<HashMap<char, usize>>();
-
-    part_one(&lines, &priorities);
-    part_two(&lines, &priorities);
+        .collect::<HashMap<char, usize>>()
 }
 
-fn part_one(lines: &Vec<&str>, priorities: &HashMap<char, usize>) {
-    let total_priority = lines
-        .iter()
+fn part_one(input: &str) -> String {
+    let priorities = get_priorities();
+    let total_priority = input
+        .lines()
         .map(|s| {
             let (compartment1, compartment2) = s.split_at(s.len() / 2);
             let common_char = compartment1
@@ -32,16 +32,16 @@ fn part_one(lines: &Vec<&str>, priorities: &HashMap<char, usize>) {
         })
         .sum::<usize>();
 
-    println!("Part One: {}", total_priority);
+    total_priority.to_string()
 }
 
-fn part_two(lines: &Vec<&str>, priorities: &HashMap<char, usize>) {
+fn part_two(input: &str) -> String {
     // This can be replaced with the array_chunks method in the nightly API.
     // https://doc.rust-lang.org/std/slice/struct.ArrayChunks.html
     let mut array_chunks: Vec<[&str; 3]> = Vec::new();
     let mut chunk: [&str; 3] = ["", "", ""];
     let mut slice_iter = 0;
-    for line in lines {
+    for line in input.lines() {
         chunk[slice_iter] = line;
         slice_iter += 1;
         if slice_iter == 3 {
@@ -51,6 +51,7 @@ fn part_two(lines: &Vec<&str>, priorities: &HashMap<char, usize>) {
         }
     }
 
+    let priorities = get_priorities();
     let total_priority = array_chunks
         .iter()
         .map(|e| {
@@ -68,5 +69,5 @@ fn part_two(lines: &Vec<&str>, priorities: &HashMap<char, usize>) {
         })
         .sum::<usize>();
 
-    println!("Part Two: {}", total_priority);
+    total_priority.to_string()
 }
