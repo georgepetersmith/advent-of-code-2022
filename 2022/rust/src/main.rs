@@ -5,6 +5,7 @@ mod day_2_rock_paper_scissors;
 mod day_3_rucksack_reorganisation;
 mod day_4_camp_cleanup;
 mod day_5_supply_stacks;
+mod day_6_tuning_trouble;
 
 fn main() {
     let day = args().nth(1).unwrap();
@@ -38,6 +39,7 @@ fn main() {
         3 => day_3_rucksack_reorganisation::run_part(part, &input),
         4 => day_4_camp_cleanup::run_part(part, &input),
         5 => day_5_supply_stacks::run_part(part, &input),
+        6 => day_6_tuning_trouble::run_part(part, &input),
         _ => panic!("There is no module setup for day {}", day),
     };
 
